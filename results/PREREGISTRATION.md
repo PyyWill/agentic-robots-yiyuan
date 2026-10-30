@@ -23,3 +23,17 @@ criterion.
 
 **Disclosure.** Before fixing this, we had seen our own pilot (1 seed: varied within-two 1.0 at m = 32, 0.77 at
 m = 16) and the Claude pilot on 4 clean cases (4/4 correct). No Claude result on `noise0.2` or `varied` had been seen.
+
+## Amendment 1 (protocol, before any re-run; the criterion above is unchanged)
+
+The first protocol excluded the failed option from the second choice. Under execution noise this is an ad-hoc rule
+that caps "within two attempts" for every agent (retrying the right tool is the rational move), and it is not the
+specified policy (act on the posterior predictive). New protocol, identical for all agents: the first choice c1;
+then the choice c2 after observing that c1 failed, which **may repeat c1** (Claude is told it may retry). Metrics
+are computed in expectation over execution noise instead of by sampling it (Rao-Blackwellised): with v_i = 1 if
+c_i is valid and q = 1 − ε, first attempt = v1·q, within two = v1·q + (1 − v1·q)·v2·q. In noise-free conditions
+this equals the sampled outcome.
+
+Seen before this amendment: our results under the old protocol (base, varied, no_name, hang, and part of noise0.2
+and unrepresentable), and Claude under the old protocol on base (m = 8, 10 seeds) and noise0.2 (m = 8, 2 seeds).
+No Claude result at m = 32 and none on varied had been seen. All runs are repeated under the new protocol.

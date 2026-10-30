@@ -60,31 +60,42 @@ def curves(rows):
 
 
 def gonogo():
-    """Paired comparison with the Claude baseline at the m values it was run for."""
+    """Paired comparison with the Claude baseline (and its anonymised variant) at the m values it was run for."""
     out = {}
-    for cond in ("base", "noise0.2", "varied"):
-        ours = {(r["seed"], r["m"]): r for r in load(cond)}
-        claude = defaultdict(list)
-        for r in load(f"claude_{cond}"):
-            claude[r["seed"], r["m"], r["set"]].append(r)
-        for m in sorted({k[1] for k in claude}):
-            seeds = sorted({s for s, mm, _ in claude if mm == m and (s, m) in ours})
-            res = {}
-            for metric, f in (("within2", any), ("0shot", lambda o: o[0])):
+    for tag in ("claude", "claude_anon"):
+        for cond in ("base", "noise0.2", "varied"):
+            ours = {(r["seed"], r["m"]): r for r in load(cond)}
+            claude = defaultdict(list)
+            for r in load(f"{tag}_{cond}"):
+                claude[r["seed"], r["m"], r["set"]].append(r)
+            for m in sorted({k[1] for k in claude}):
+                seeds = sorted({s for s, mm, _ in claude if mm == m and (s, m) in ours})
+                res = {}
                 for key in ("L2_ood", "invent"):
-                    c = [np.mean([f(r["outcomes"]) for r in claude[s, m, key]]) for s in seeds if claude[s, m, key]]
-                    o = [ours[s, m][f"{key}_{metric}"] for s in seeds if claude[s, m, key]]
-                    if c:
+                    have = [s for s in seeds if claude[s, m, key]]
+                    if not have:
+                        continue
+                    for metric, i in (("0shot", 0), ("within2", 1)):
+                        c = [np.mean([expected(r)[i] for r in claude[s, m, key]]) for s in have]
+                        o = [ours[s, m][f"{key}_{metric}"] for s in have]
                         d = np.array(o) - np.array(c)
                         res[f"{key}_{metric}"] = {"ours": mean_ci(o), "claude": mean_ci(c), "diff": mean_ci(d),
                                                   "seeds_ours_better": int((d > 0).sum()), "n_seeds": len(d)}
-            cost = sum(r["cost"] for k, rs in claude.items() if k[1] == m for r in rs)
-            res["cost_usd"] = round(cost, 2)
-            out[f"{cond}@m{m}"] = res
-    crit = [out.get(f"{c}@m32", {}).get("L2_ood_within2") for c in ("noise0.2", "varied")]
+                    res[f"{key}_claude_retry"] = float(np.mean([r["choices"][0] == r["choices"][-1]
+                                                                for s in have for r in claude[s, m, key]]))
+                res["cost_usd"] = round(sum(r["cost"] for k, rs in claude.items() if k[1] == m for r in rs), 2)
+                out[f"{tag}:{cond}@m{m}"] = res
+    crit = [out.get(f"claude:{c}@m32", {}).get("L2_ood_within2") for c in ("noise0.2", "varied")]
     out["verdict"] = None if None in crit else (
         "GO" if all(x["diff"][0] >= 0.15 and x["seeds_ours_better"] >= 8 for x in crit) else "NO-GO")
     return out
+
+
+def expected(r):
+    """Claude's expected success (first attempt, within two) from the validity of its two choices."""
+    q = 1.0 - r["noise"]
+    first = r["valid"][0] * q
+    return first, first + (1 - first) * r["valid"][1] * q
 
 
 def main():
