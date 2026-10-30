@@ -127,3 +127,20 @@ def invention_set(rng, s: Situation):
 def actions_of(items, handles=(), tips=()):
     """Skill-level action space: use an item, or construct a tool from a handle and a tip."""
     return list(items) + list(tips) + [compose(h, t) for h in handles for t in tips]
+
+
+def render(ax, s: Situation, t: Tool, title=""):
+    """Side view of a sofa scene with a tool slid under it (cm). Red = the tool does not fit, is too short, or bends."""
+    import matplotlib.patches as P
+    top = s.gap + 12
+    ax.add_patch(P.Rectangle((0, s.gap), s.dist + 25, 12, color="#b9a58f"))  # sofa body above the gap
+    ax.add_patch(P.Rectangle((s.dist + 25, 0), 3, top, color="#8a7560"))  # back of the sofa
+    ax.add_patch(P.Circle((s.dist, s.ring / 2), s.ring / 2, fill=False, lw=2, color="#d4a017"))  # ring target
+    ax.plot([-15, s.dist + 35], [0, 0], color="k", lw=1)
+    col = "#2e7d32" if succeeds(s, t) else "#c62828"
+    ax.add_patch(P.Rectangle((0, 0.2), t.length, t.width, color=col, alpha=0.8 if t.rigid else 0.35))  # held at x=0
+    if t.hook > 0:
+        ax.add_patch(P.Rectangle((t.length - 0.8, 0.2), 0.8, max(t.hook, t.width), color=col))
+    if t.parts:  # mark the joint of a constructed tool
+        ax.plot([t.parts[0].length] * 2, [0, t.width + 0.6], color="k", lw=1.5)
+    ax.set(xlim=(-15, s.dist + 35), ylim=(-1, top + 2), aspect="equal", xticks=[], yticks=[], title=title)

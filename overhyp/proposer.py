@@ -61,9 +61,11 @@ class OracleProposer:
         """Candidate essences proposed when a skill is first named (scene-level vocabulary)."""
         return list(INITIAL[SCENE[s.skill]])
 
-    def propose(self, skills, have, rng):
-        """Asked after reproducible mispredictions: true components of the named skills not yet in D (if
-        representable), plus `spurious` irrelevant candidates. `skills` = ground-truth skills of the evidence."""
+    def propose(self, situations, have, rng):
+        """Asked after reproducible mispredictions in these situations: the oracle looks at the scenes (it knows
+        their ground-truth skills) and returns one true component not yet in D (if representable), plus
+        `spurious` irrelevant candidates."""
+        skills = sorted({s.skill for s in situations})
         true = [c for k in skills for c in ESSENCE[k] if c not in have and (self.representable or c != "rigid")]
         junk = [c for c in SPURIOUS if c not in have]
         out = list(dict.fromkeys(true))[:1]

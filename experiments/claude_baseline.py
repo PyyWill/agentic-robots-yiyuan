@@ -115,9 +115,9 @@ def main():
     for name in a.conditions:
         path = ROOT / "results" / "raw" / f"claude_{name}.jsonl"
         path.parent.mkdir(parents=True, exist_ok=True)
-        done = {(r["seed"], r["set"], r["case"]) for r in map(json.loads, open(path))} if path.exists() else set()
+        done = {(r["seed"], r["m"], r["set"], r["case"]) for r in map(json.loads, open(path))} if path.exists() else set()
         for seed in range(a.seeds):
-            todo = [(key, c) for key, c in cases_for(name, seed, a.m, a.n_l2, a.n_inv) if (seed, *key) not in done]
+            todo = [(key, c) for key, c in cases_for(name, seed, a.m, a.n_l2, a.n_inv) if (seed, a.m, *key) not in done]
             with ThreadPoolExecutor(a.threads) as pool:
                 results = list(pool.map(lambda kc: solve(kc[1], a.max_tokens), todo))
             with open(path, "a") as f:

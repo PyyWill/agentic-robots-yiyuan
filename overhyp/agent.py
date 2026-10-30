@@ -101,7 +101,7 @@ class Agent:
         if repeated <= sk.asked or sk.model.criticize([ids[c] for c in configs]) <= 0:
             return
         sk.asked = repeated
-        new = self.proposer.propose(sorted({tr.s.skill for tr in trials}), sk.cands, self.rng)
+        new = self.proposer.propose([tr.s for tr in trials], sk.cands, self.rng)
         sk.cands += new
         sk.log_odds += [self.proposer.log_odds(c, s) for c in new]
         sk.allow_split = self.splits
