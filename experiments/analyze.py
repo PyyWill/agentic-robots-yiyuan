@@ -98,25 +98,75 @@ def expected(r):
     return first, first + (1 - first) * r["valid"][1] * q
 
 
+def f(x):
+    return "–" if x is None else f"{x[0]:.2f} ± {x[1]:.2f}" if isinstance(x, (tuple, list)) else f"{x:.2f}"
+
+
+def markdown(summary):
+    """Tables for results/RESULTS.md (mean ± 95% CI over seeds; expected success in new OOD situations)."""
+    S, out = summary, []
+    c = S.get("base")
+    if c:
+        out += ["### Base (hook back, π = 1): learning curve", "",
+                "| m | L2 1st attempt | L2 within two | L1 1st | invention 1st | MAP = true essence | queries | trials |",
+                "|---|---|---|---|---|---|---|---|"]
+        for m in sorted(c["curve"]["L2_ood_0shot"], key=int):
+            st = c["structure"][m]
+            out.append(f"| {m} | {f(c['curve']['L2_ood_0shot'][m])} | {f(c['curve']['L2_ood_within2'][m])} | "
+                       f"{f(c['curve'].get('L1_0shot', {}).get(m))} | {f(c['curve']['invent_0shot'][m])} | "
+                       f"{f(st.get('exact_gt'))} | {f(st.get('queries'))} | {st.get('trials', 0):.0f} |")
+        b = c["baseline"]
+        out += ["", f"Baselines on the same tests: random {f(b['random']['L2_ood_0shot'])} / "
+                f"{f(b['random']['L2_ood_within2'])}, VLM prior only {f(b['prior']['L2_ood_0shot'])} / "
+                f"{f(b['prior']['L2_ood_within2'])} (L2 1st / within two); invention 1st: random "
+                f"{f(b['random']['invent_0shot'])}, VLM prior {f(b['prior']['invent_0shot'])}.", ""]
+    rows = [k for k in ("base", "noise0.1", "noise0.2", "unrepresentable", "pi0.75", "varied", "no_name", "informed",
+                        "misleading", "hang", "hang_nosplit") if k in S]
+    out += ["### All conditions at the last checkpoint", "",
+            "| condition | m | L1 1st | L2 1st | L2 within two | invention 1st | structure agrees with truth | queries | |D| | VLM-prior L2 1st |",
+            "|---|---|---|---|---|---|---|---|---|---|"]
+    for k in rows:
+        cur, st = S[k]["curve"], S[k]["structure"]
+        for m in sorted({"32", max(cur["L2_ood_0shot"], key=int)}, key=int):
+            if m not in cur["L2_ood_0shot"]:
+                continue
+            out.append(f"| {k} | {m} | {f(cur.get('L1_0shot', {}).get(m))} | {f(cur['L2_ood_0shot'][m])} | "
+                       f"{f(cur['L2_ood_within2'][m])} | {f(cur.get('invent_0shot', {}).get(m))} | "
+                       f"{f(st[m].get('map_accuracy'))} | {f(st[m].get('queries'))} | {f(st[m].get('n_cands'))} | "
+                       f"{f(S[k]['baseline'].get('prior', {}).get('L2_ood_0shot'))} |")
+    arms = [k for k in ("budget_32x1", "budget_16x2", "budget_8x4", "budget_4x8") if k in S]
+    if arms:
+        out += ["", "### Breadth vs depth (32 random configurations)", "",
+                "| arm | L2 1st | L2 within two | trials incl. repeats | structure agrees with truth |", "|---|---|---|---|---|"]
+        for k in arms:
+            cur, st = S[k]["curve"], S[k]["structure"]
+            m = max(cur["L2_ood_0shot"], key=int)
+            out.append(f"| {k.split('_')[1]} | {f(cur['L2_ood_0shot'][m])} | {f(cur['L2_ood_within2'][m])} | "
+                       f"{st[m]['trials']:.0f} | {f(st[m].get('map_accuracy'))} |")
+    g = S.get("gonogo", {})
+    keys = [k for k in g if ":" in k]
+    if keys:
+        out += ["", f"### Go/no-go against Claude (identical inputs). Verdict: **{g.get('verdict')}**", "",
+                "| baseline: condition@m | test | ours | Claude | ours − Claude | seeds ours better | Claude retries | cost |",
+                "|---|---|---|---|---|---|---|---|"]
+        for k in keys:
+            for key in ("L2_ood", "invent"):
+                for metric in ("within2", "0shot"):
+                    r = g[k].get(f"{key}_{metric}")
+                    if r:
+                        out.append(f"| {k} | {key} {metric} | {f(r['ours'])} | {f(r['claude'])} | {f(r['diff'])} | "
+                                   f"{r['seeds_ours_better']}/{r['n_seeds']} | {f(g[k].get(key + '_claude_retry'))} | "
+                                   f"${g[k]['cost_usd']} |")
+    return "\n".join(out) + "\n"
+
+
 def main():
-    conds = sorted(p.stem for p in RAW.glob("*.jsonl") if not p.stem.startswith("claude_"))
+    conds = sorted(p.stem for p in RAW.glob("*.jsonl") if not p.stem.startswith("claude"))
     summary = {c: curves(load(c)) for c in conds}
     summary["gonogo"] = gonogo()
     (ROOT / "results" / "summary.json").write_text(json.dumps(summary, indent=1, default=float))
-    for c in conds:
-        cur = summary[c]["curve"]
-        ms = sorted(cur["L2_ood_within2"])
-        print(f"\n== {c}  (m: {ms})")
-        for k in ("L2_ood_0shot", "L2_ood_within2", "L1_0shot", "invent_0shot"):
-            if k in cur:
-                print(f"  {k:16s}", "  ".join(f"{cur[k][m][0]:.2f}±{cur[k][m][1]:.2f}" for m in ms if m in cur[k]),
-                      "| random %.2f prior %.2f" % (summary[c]["baseline"].get("random", {}).get(k, (np.nan,))[0],
-                                                    summary[c]["baseline"].get("prior", {}).get(k, (np.nan,))[0]))
-        st = summary[c]["structure"]
-        print("  structure@max m:", {k: (round(v, 2) if v is not None else None) for k, v in st[max(st)].items()})
-    print("\n== go/no-go")
-    for k, v in summary["gonogo"].items():
-        print(" ", k, v)
+    (ROOT / "results" / "RESULTS.md").write_text(markdown(json.loads(json.dumps(summary, default=float))))
+    print((ROOT / "results" / "RESULTS.md").read_text())
 
 
 if __name__ == "__main__":

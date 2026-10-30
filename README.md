@@ -57,17 +57,22 @@ pushes successes out of it, and a redundant one only costs its prior.
 P(y = 1 | j, a, Y) = Σ_h P(h | Y) · E[(S_{j,g} + α_g β_g) / (n_{j,g} + α_g) | Y, h],   g = g_h(j, a)
 ```
 
-In a new situation the bag is empty and this is E[β_g] (0-shot); after one failure it is updated within the
-situation (1-shot; α decides how much one failure says about the rest of the situation). The robot takes the
-action with the highest predictive success among items **and constructions** (construct-to-spec).
+In a new situation the bag is empty and this is E[β_g] (0-shot). The robot takes the action with the highest
+predictive success among items **and constructions** (construct-to-spec); after a failure the failed trial enters
+the situation's bag (1-shot: α decides how much one failure says about the rest of the situation) and it chooses
+again by the same rule, which may mean retrying the same tool when the failure looks like noise. No other rule.
 
-**Model criticism → D growth and splits.** Training tries random tools; an outcome the skill mispredicts is
-repeated once. After each situation, configuration-level Kemp models are fitted inside each class of the MAP
-structure (bags = same situation and same tool; only mispredicted configurations contribute their repeats). If the
-Bayes factor favours *reproducible* (α < 1: repeats agree more than halfway between chance and certainty, Fact 2)
-over *noise* (α ≥ 1), the factor behind the misprediction is missing: the robot asks the proposer for new
-candidates and allows splits. Execution noise does not trigger this; a missing component (e.g. rigidity) does.
-New candidates are evaluated retroactively on the experience memory.
+**Model criticism → D growth and splits.** Training tries random tools. Each configuration's first outcome is an
+observation of its situation (a category member in Kemp's sense); an outcome the skill mispredicts is repeated
+once, and the repeat is used only here. After each situation, configuration-level Kemp models are fitted inside
+each class of the MAP structure (bags = same situation and same tool; only mispredicted configurations contribute
+their repeats). If the Bayes factor favours *reproducible* (α < 1: repeats agree more than halfway between chance
+and certainty, Fact 2) over *noise* (α ≥ 1), a factor behind the misprediction is missing: the robot asks the
+proposer for new candidates and allows splits. New candidates are evaluated retroactively on the experience memory.
+
+**Evaluation.** Each test records the first choice c1 and the choice c2 made after being told c1 failed. Success is
+computed in expectation over execution noise ε (v_i = 1 if c_i is valid, q = 1 − ε): first attempt v1·q, within
+two attempts v1·q + (1 − v1·q)·v2·q. Without noise this is the sampled outcome.
 
 **Inference.** Exact model averaging over all 2^|D| conjunctions (and all splits, once allowed); (log α, logit β)
 on a 32 × 60 midpoint grid (≤ 0.02 nats from a 320 × 600 grid on up to 100 bags). Within a situation the posterior
@@ -125,13 +130,28 @@ quality (`informed`, `misleading`), execution noise (`noise0.1`, `noise0.2`), bu
   over arbitrary partitions are not implemented: a partition must be definable by a candidate.
 - **Split prior** = the prior odds of its predicate. A single split structure is penalised (a second conjunction
   must be specified), but the total prior mass on "some split" grows with |D|.
-- **The proposer is an oracle**: when asked, it returns the true missing component (if representable) plus a spurious
-  one. Proposing is the VLM's job; this prototype tests what experience does with the proposals. A Claude proposer
-  on rendered scenes is the next step.
+- **Part of the outcome is fixed by construction.** The candidate library contains the ground-truth components; the
+  oracle returns the missing true component on the first request; every wrong test option violates exactly one
+  component, so once the posterior concentrates on the true essence L2 is necessarily 1; and the predicates of a
+  constructed tool are computed exactly from its parts (`compose` is a perfect forward model). What these
+  experiments test is therefore: choosing among proposed candidates from outcomes (relational vs. absolute,
+  categorical and correlated distractors, necessity, minimality), deciding *when* to ask for more candidates, splits,
+  transfer to new situations, and acting on the learned spec for tools never built. They do not test proposing
+  candidates, perception, or predicting what a construction will be.
+- **Criticism is liberal**: log Bayes factor > 0, so one reproduced misprediction can trigger a query; under noise
+  this adds spurious candidates (query counts are reported). They do not enter the MAP essence, but D grows.
+- **p(split) is largely prior** in skills that need no split: a split on an essential candidate is almost
+  observationally equivalent to adding it to the conjunction. Read the MAP structure, not p(split), as the evidence.
+- **Truncation** (structures outside the top 1 − 10⁻⁹ posterior mass) is exact at each batch refit; between refits
+  (within a situation) the reviewer measured ≤ 2·10⁻¹⁰ in predictive probability with 2 tries per situation.
+- **H4 arms** fix the number of random configurations (32); repeats after mispredictions differ by arm (trial counts
+  are reported). L1 is not compared across budget arms (they have 4 to 32 seen situations).
 - **Level 3** (λ shared across skills) is not implemented; λ = 1 as in Kemp et al.
-- **Numerics**: quadrature error ≤ 0.02 nats on up to 100 bags (≈ 0.1 for a class with hundreds of trials at an
-  intermediate rate); structures outside the top 1 − 10⁻⁹ posterior mass of a leaf are dropped from prediction;
-  within a situation the posterior is updated on the kept structures and refitted in batch afterwards.
+- **Quadrature** error ≤ 0.02 nats on up to 100 bags (≈ 0.1 for a class with hundreds of trials at an intermediate
+  rate).
+- **Protocol history**: a first protocol forbade retrying the option that just failed (a rule that caps every
+  agent under noise); it was replaced before the reported runs (`results/PREREGISTRATION.md`, Amendment 1). Its
+  results are kept in `results/superseded_protocol_v0/` and are not used.
 - **Exploration is random**; the tests are diagnostic sets, not natural scenes; noise only turns successes into
   failures.
 
