@@ -1,0 +1,12 @@
+Metadata-Version: 2.4
+Name: overhyp
+Version: 0.1.0
+Summary: Grounded generalization for agentic robots: Kemp et al. (2007) overhypotheses over robot skill essences
+Requires-Python: >=3.10
+Requires-Dist: numpy>=1.24
+Requires-Dist: scipy>=1.10
+Requires-Dist: matplotlib>=3.7
+Provides-Extra: baseline
+Requires-Dist: requests>=2.31; extra == "baseline"
+Provides-Extra: dev
+Requires-Dist: pytest>=8; extra == "dev"
