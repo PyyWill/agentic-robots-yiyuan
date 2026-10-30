@@ -60,6 +60,16 @@ class Agent:
     def trials(self, name):
         return [tr for tr in self.memory if tr.name == name]
 
+    def firsts(self, name):
+        """First trial of every configuration (situation, tool): the observations (category members) of the Kemp
+        model. A repeat re-measures the same member and is kept for model criticism only."""
+        seen, out = set(), []
+        for tr in self.trials(name):
+            if (tr.s.sid, tr.t) not in seen:
+                seen.add((tr.s.sid, tr.t))
+                out.append(tr)
+        return out
+
     @staticmethod
     def _predict(sk, model, s, tools):
         if model is None:
@@ -77,18 +87,17 @@ class Agent:
 
     # ------------------------------------------------------------------ training: explore, repeat, criticize
     def explore(self, s, items, n_trials=2):
-        """Try random tools; an outcome the skill mispredicts is repeated once (same situation, same tool).
-        The posterior is updated after every trial and refitted in batch at the end of the situation."""
+        """Try random tools. Each outcome updates the posterior; an outcome the skill mispredicts is repeated once
+        (same situation, same tool) and the repeat goes to model criticism only. Batch refit after the situation."""
         name, sk = self.skill(s)
         for k in self.rng.permutation(len(items))[:n_trials]:
             p = self._predict(sk, sk.model, s, [items[k]])[0]
-            outcomes = [attempt(s, items[k], self.rng, self.noise)]
-            if p != 0.5 and (p > 0.5) != outcomes[0]:
-                outcomes.append(attempt(s, items[k], self.rng, self.noise))
-            for y in outcomes:
-                self.memory.append(Trial(s, items[k], y, name))
-                sk.model = self._add(sk, sk.model, s, items[k], y)
-        sk.fit(self.trials(name))
+            y = attempt(s, items[k], self.rng, self.noise)
+            self.memory.append(Trial(s, items[k], y, name))
+            sk.model = self._add(sk, sk.model, s, items[k], y)
+            if p != 0.5 and (p > 0.5) != y:
+                self.memory.append(Trial(s, items[k], attempt(s, items[k], self.rng, self.noise), name))
+        sk.fit(self.firsts(name))
         self.criticize(s)
 
     def criticize(self, s):
@@ -98,66 +107,55 @@ class Agent:
         configs = [(tr.s.sid, tr.t) for tr in trials]
         ids = {c: i for i, c in enumerate(dict.fromkeys(configs))}
         repeated = len(configs) - len(ids)
-        if repeated <= sk.asked or sk.model.criticize([ids[c] for c in configs]) <= 0:
+        if repeated <= sk.asked:
+            return
+        X = sk.X([(tr.s, tr.t) for tr in trials])
+        if sk.model.criticize(X, [tr.y for tr in trials], [ids[c] for c in configs]) <= 0:
             return
         sk.asked = repeated
         new = self.proposer.propose([tr.s for tr in trials], sk.cands, self.rng)
         sk.cands += new
         sk.log_odds += [self.proposer.log_odds(c, s) for c in new]
         sk.allow_split = self.splits
-        sk.fit(trials)
-        self.log.append((len(self.memory), name, new))
+        sk.fit(self.firsts(name))
+        self.log.append((len(self.memory), name, list(new)))
 
     # ------------------------------------------------------------------ testing: act on the posterior predictive
-    def solve(self, s, actions, attempts=2):
-        """Choose the action with the highest posterior predictive; after a failure, update within the situation
-        (not memorised) and choose again among untried actions. Returns (outcomes, chosen action indices)."""
+    def solve(self, s, actions):
+        """First choice c1 (highest posterior predictive), and the choice c2 after observing that c1 failed (the
+        failure is added to the situation's bag, not memorised). c2 may be c1 again: a retry is chosen when the
+        model attributes the failure to noise. Returns (c1, c2)."""
         _, sk = self.skill(s)
-        model = copy.deepcopy(sk.model)
-        outcomes, chosen = [], []
-        for _ in range(attempts):
-            p = self._predict(sk, model, s, actions)
-            p[chosen] = -1
-            k = int(self.rng.choice(np.flatnonzero(p == p.max())))
-            y = attempt(s, actions[k], self.rng, self.noise)
-            outcomes.append(y), chosen.append(k)
-            if y:
-                break
-            model = self._add(sk, model, s, actions[k], y)
-        return outcomes, chosen
+        p = self._predict(sk, sk.model, s, actions)
+        c1 = int(self.rng.choice(np.flatnonzero(p == p.max())))
+        model = self._add(sk, copy.deepcopy(sk.model), s, actions[c1], False)
+        p = self._predict(sk, model, s, actions)
+        return c1, int(self.rng.choice(np.flatnonzero(p == p.max())))
 
 
 class RandomAgent:
-    def __init__(self, rng, noise=0.0):
-        self.rng, self.noise = rng, noise
+    """Two different random actions."""
 
-    def solve(self, s, actions, attempts=2):
-        outcomes, chosen = [], []
-        for k in self.rng.permutation(len(actions))[:attempts]:
-            outcomes.append(attempt(s, actions[k], self.rng, self.noise)), chosen.append(int(k))
-            if outcomes[-1]:
-                break
-        return outcomes, chosen
+    def __init__(self, rng):
+        self.rng = rng
+
+    def solve(self, s, actions):
+        c1, c2 = self.rng.permutation(len(actions))[:2]
+        return int(c1), int(c2)
 
 
 class PriorAgent(RandomAgent):
     """VLM prior only, no experience: P(success | a) = P(a satisfies the essence) = prod over the candidates c
-    that a violates of (1 - rho_c), under the proposer's prior over conjunctions."""
+    that a violates of (1 - rho_c), under the proposer's prior over conjunctions. Its two best actions."""
 
-    def __init__(self, proposer, rng, noise=0.0):
-        super().__init__(rng, noise)
+    def __init__(self, proposer, rng):
+        super().__init__(rng)
         self.proposer = proposer
 
-    def solve(self, s, actions, attempts=2):
+    def solve(self, s, actions):
         cands = self.proposer.initial(s)
         log1m = np.array([-np.logaddexp(0, self.proposer.log_odds(c, s)) for c in cands])
         score = (~np.array([[LIBRARY[c](s, t) for c in cands] for t in actions], bool)).astype(float) @ log1m
-        outcomes, chosen = [], []
-        for _ in range(attempts):
-            sc = score.copy()
-            sc[chosen] = -np.inf
-            k = int(self.rng.choice(np.flatnonzero(sc == sc.max())))
-            outcomes.append(attempt(s, actions[k], self.rng, self.noise)), chosen.append(k)
-            if outcomes[-1]:
-                break
-        return outcomes, chosen
+        c1 = int(self.rng.choice(np.flatnonzero(score == score.max())))
+        score[c1] = -np.inf
+        return c1, int(self.rng.choice(np.flatnonzero(score == score.max())))

@@ -14,17 +14,17 @@ import numpy as np
 
 from overhyp.agent import Agent, PriorAgent, RandomAgent
 from overhyp.proposer import OracleProposer
-from overhyp.toolworld import actions_of, invention_set, near_miss_set, random_situation, random_tool, succeeds
+from overhyp.toolworld import invention_set, near_miss_set, random_situation, random_tool, succeeds
 
 CHECKPOINTS = (0, 2, 4, 8, 16, 32)
 CONDITIONS = {  # proposer knobs, noise, ground-truth skill mixture, protocol
     "base": dict(),
-    "varied": dict(pi=0.5),
+    "varied": dict(pi=0.5, checkpoints=CHECKPOINTS + (64,)),
     "no_name": dict(no_name=True),
     "hang": dict(skill="hang"),
     "noise0.2": dict(noise=0.2),
     "unrepresentable": dict(representable=False),
-    "pi0.75": dict(pi=0.75),
+    "pi0.75": dict(pi=0.75, checkpoints=CHECKPOINTS + (64,)),
     "noise0.1": dict(noise=0.1),
     "hang_nosplit": dict(skill="hang", splits=False),
     "informed": dict(prior="informed"),
@@ -52,21 +52,34 @@ def test_sets(seed, cfg, n_test=30, n_inv=10):
     sets = {"L2_ood": [(s, near_miss_set(rng, s)) for s in ood], "L2_iid": [(s, near_miss_set(rng, s)) for s in iid]}
     if cfg.get("skill") != "hang":
         inv = [random_situation(rng, 30_000 + i, "hook_back", ood=True) for i in range(n_inv)]
-        sets["invent"] = [(s, actions_of(*invention_set(rng, s))) for s in inv]
+        sets["invent"] = [(s, *invention_set(rng, s)) for s in inv]  # (situation, actions, labels)
     return sets
 
 
-def evaluate(solver, sets, rng, l1=()):
+def expected_success(v1, v2, noise):
+    """Success at the first attempt and within two, in expectation over execution noise (Rao-Blackwellised):
+    v_i = choice i is valid; c2 is the choice made after observing that c1 failed."""
+    q = 1.0 - noise
+    first = np.asarray(v1, float) * q
+    return first, first + (1 - first) * np.asarray(v2, float) * q
+
+
+def evaluate(solver, sets, rng, noise, l1=()):
     out = {}
     for key, cases in list(sets.items()) + [("L1", l1)]:
         if not cases:
             continue
-        res = [solver(s, a, rng) for s, a in cases]
-        out[key + "_0shot"] = float(np.mean([r[0][0] for r in res]))
-        out[key + "_within2"] = float(np.mean([any(r[0]) for r in res]))
+        res = [solver(case[0], case[1], rng) for case in cases]
+        v1 = [succeeds(case[0], case[1][c1]) for case, (c1, _) in zip(cases, res)]
+        v2 = [succeeds(case[0], case[1][c2]) for case, (_, c2) in zip(cases, res)]
+        first, within2 = expected_success(v1, v2, noise)
+        out[key + "_0shot"], out[key + "_within2"] = float(first.mean()), float(within2.mean())
         if key == "invent":  # first choice: a constructed tool? not the broom (item 0, the VLM's suggestion)?
-            out["invent_built"] = float(np.mean([len(a[r[1][0]].parts) > 0 for (s, a), r in zip(cases, res)]))
-            out["invent_rejects_broom"] = float(np.mean([r[1][0] != 0 for r in res]))
+            out["invent_built"] = float(np.mean([len(a[c1].parts) > 0 for (_, a, _), (c1, _) in zip(cases, res)]))
+            out["invent_rejects_broom"] = float(np.mean([lab[c1] != "broom (VLM's pick)" for (_, _, lab), (c1, _)
+                                                         in zip(cases, res)]))
+        if key == "L2_ood":
+            out["L2_ood_retry"] = float(np.mean([c1 == c2 for c1, c2 in res]))
     return out
 
 
@@ -78,14 +91,14 @@ def structure(agent, sets):
             continue
         c, conj = sk.model.map_structure()
         params = sk.model.map_params()
-        out[name] = {"split": None if c is None else sk.cands[c], "cands": sk.cands,
+        out[name] = {"split": None if c is None else sk.cands[c], "cands": list(sk.cands),
                      "leaves": {str(side): [sk.cands[i] for i in idx] for side, idx in conj.items()},
                      "beta": {str(side): [round(params[side][g][1], 3) for g in (0, 1)] for side in conj},
                      "alpha": {str(side): [round(params[side][g][0], 3) for g in (0, 1)] for side in conj},
                      "p_split": float(1 - sk.model.top[None])}
         agree = []
         for key in ("L2_ood", "L2_iid"):
-            for s, acts in sets[key]:
+            for s, acts, *_ in sets[key]:
                 if agent.proposer.name(s) != name:
                     continue
                 X = sk.X([(s, t) for t in acts])
@@ -119,7 +132,7 @@ def run(args):
     cfg, agent, rng, sets = setup(name, seed)
     rows, seen = [], []
     checkpoints = cfg.get("checkpoints", CHECKPOINTS)
-    baselines = {"random": RandomAgent(None, agent.noise), "prior": PriorAgent(agent.proposer, None, agent.noise)}
+    baselines = {"random": RandomAgent(None), "prior": PriorAgent(agent.proposer, None)}
 
     def solver(policy):
         def f(s, a, r):
@@ -132,13 +145,13 @@ def run(args):
             l1_rng = np.random.default_rng([seed, 3])
             l1 = [(s, near_miss_set(l1_rng, s)) for s in seen[:10]]
             train_rng, row = agent.rng, {"condition": name, "seed": seed, "m": m, "trials": len(agent.memory)}
-            row.update(evaluate(solver(agent), sets, np.random.default_rng([seed, 4, m]), l1))
+            row.update(evaluate(solver(agent), sets, np.random.default_rng([seed, 4, m]), agent.noise, l1))
             agent.rng = train_rng
             row["skills"] = structure(agent, sets)
-            row["growth"] = agent.log
+            row["growth"] = [list(g) for g in agent.log]
             if m == checkpoints[0]:
                 for b, pol in baselines.items():
-                    row[b] = evaluate(solver(pol), sets, np.random.default_rng([seed, 5]), l1)
+                    row[b] = evaluate(solver(pol), sets, np.random.default_rng([seed, 5]), agent.noise, l1)
             rows.append(row)
         if m < max(checkpoints):
             train_next(agent, rng, cfg, seen)

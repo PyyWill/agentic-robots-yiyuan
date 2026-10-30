@@ -112,17 +112,18 @@ def test_update_equals_refit():
 
 def test_criticize_separates_noise_from_missing_factor():
     rng = np.random.default_rng(2)
-    # missing tool-level factor: candidate c3 hidden from the learner; repeat each configuration twice
-    X, y, sit, cfg = synthetic(rng, m=20, n=4)
-    Xr, yr, sr, cr = (np.repeat(a, 2, axis=0) for a in (X, y, sit, np.arange(len(y))))
-    oh = Overhypothesis(np.full(5, -1.0)).fit(Xr[:, [0, 1, 2, 4, 5]], yr, sr)
-    assert oh.criticize(cr) > 0
-    # once the factor is a candidate, the same data are explained: nothing left to criticize
-    oh = Overhypothesis(np.full(6, -1.0)).fit(Xr, yr, sr)
-    assert oh.criticize(cr) == 0
-    # execution noise instead: essence c0..c2 fully visible, 30% random failures
-    X, y, sit, cfg = synthetic(rng, m=20, n=4)
+    # missing tool-level factor: candidate c3 hidden from the learner; every configuration tried twice
+    X, y, sit, _ = synthetic(rng, m=20, n=4)
+    Xr, yr, cr = (np.repeat(a, 2, axis=0) for a in (X, y, np.arange(len(y))))
+    keep = [0, 1, 2, 4, 5]
+    oh = Overhypothesis(np.full(5, -1.0)).fit(X[:, keep], y, sit)  # the model sees first trials only
+    assert oh.criticize(Xr[:, keep], yr, cr) > 0
+    # once the factor is a candidate, nothing is mispredicted
+    oh = Overhypothesis(np.full(6, -1.0)).fit(X, y, sit)
+    assert oh.criticize(Xr, yr, cr) == -np.inf
+    # execution noise instead: essence c0..c2 fully visible, 30% random failures on every trial
+    X, y, sit, _ = synthetic(rng, m=20, n=4)
     Xr, sr, cr = (np.repeat(a, 2, axis=0) for a in (X, sit, np.arange(len(y))))
     yr = Xr[:, :3].all(1) & (rng.random(len(cr)) > 0.3)
-    oh = Overhypothesis(np.full(3, -1.0)).fit(Xr[:, :3], yr, sr)
-    assert oh.criticize(cr) <= 0
+    oh = Overhypothesis(np.full(3, -1.0)).fit(Xr[::2, :3], yr[::2], sr[::2])
+    assert oh.criticize(Xr[:, :3], yr, cr) < 0

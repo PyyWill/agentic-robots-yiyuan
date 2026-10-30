@@ -23,9 +23,10 @@ def test_test_sets_have_one_valid_option():
             assert sum(succeeds(s, t) for t in near_miss_set(rng, s)) == 1
     for _ in range(20):
         s = random_situation(rng, 0, "hook_back", ood=True)
-        acts = actions_of(*invention_set(rng, s))
+        acts, labels = invention_set(rng, s)
         valid = [a for a in acts if succeeds(s, a)]
         assert len(valid) == 1 and valid[0].parts  # only a constructed tool works
+        assert labels[acts.index(valid[0])] == "ruler + clip"
 
 
 def test_compose():
@@ -42,5 +43,6 @@ def test_agent_runs_and_grows_d():
         agent.explore(random_situation(rng, j, "hook_back"), [random_tool(rng) for _ in range(6)])
     assert any("rigid" in new for _, _, new in agent.log)
     s = random_situation(rng, 99, "hook_back", ood=True)
-    outcomes, chosen = agent.solve(s, near_miss_set(rng, s))
-    assert 1 <= len(outcomes) <= 2 and len(set(chosen)) == len(chosen)
+    acts = near_miss_set(rng, s)
+    c1, c2 = agent.solve(s, acts)
+    assert 0 <= c1 < len(acts) and 0 <= c2 < len(acts)

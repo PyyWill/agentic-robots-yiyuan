@@ -255,34 +255,37 @@ class Overhypothesis:
         return {side: self.leaves[c, side].best()[1] for side in conj}
 
     # ---------------------------------------------------------------- model criticism
-    def criticize(self, config):
+    def criticize(self, X, y, config):
         """Are the outcomes the current skill structure mispredicts reproducible?
 
+        X, y, config: all trials of the skill, including repeats (the model itself is fitted on first trials).
         Within each class (leaf, g) of the MAP structure, bags = configurations (same situation, same tool).
         Every configuration contributes its first trial (this fixes the class rate beta; Fact 1: no information
         about alpha); a configuration whose first outcome the structure mispredicts (opposite to its expected
         outcome, beta_g > 1/2) also contributes its repeats. Returns the largest log Bayes factor over classes of
         "reproducible" (alpha < 1: two trials of one configuration agree more than halfway between chance and
-        certainty, Fact 2) versus "noise" (alpha >= 1); 0 if no mispredicted configuration was repeated."""
-        config = np.asarray(config)
+        certainty, Fact 2) versus "noise" (alpha >= 1); -inf if no mispredicted configuration was repeated."""
+        X, y, config = np.asarray(X, bool).reshape(len(y), -1), np.asarray(y, bool), np.asarray(config)
         c, conj = self.map_structure()
         small = self.kemp.alpha < 1
         prior_odds = lse(self.kemp.log_prior[small]) - lse(self.kemp.log_prior[~small])
         params = self.map_params()
-        best = 0.0
+        best = -np.inf
         for side, idx in conj.items():
-            rows = np.flatnonzero(self.leaves[c, side].rows)
-            g = np.all(self.X[rows][:, list(idx)], axis=1)
+            rows = np.flatnonzero(np.ones(len(y), bool) if c is None else X[:, c] == side)
+            g = np.all(X[rows][:, list(idx)], axis=1)
             for gv in (False, True):
                 cls = rows[g == gv]
+                if not len(cls):
+                    continue
                 expected = params[side][int(gv)][1] > 0.5
                 _, first, inv = np.unique(config[cls], return_index=True, return_inverse=True)
                 inv = inv.ravel()
-                use = (self.y[cls][first] != expected)[inv] | np.isin(np.arange(len(cls)), first)
+                use = (y[cls][first] != expected)[inv] | np.isin(np.arange(len(cls)), first)
                 n = np.bincount(inv[use], minlength=len(first))
                 if not (n >= 2).any():
                     continue
-                s = np.bincount(inv[use], weights=self.y[cls][use], minlength=len(first)).astype(int)
+                s = np.bincount(inv[use], weights=y[cls][use], minlength=len(first)).astype(int)
                 lj = self.kemp.log_joint(s[None], (n - s)[None])[0]
                 best = max(best, lse(lj[small]) - lse(lj[~small]) - prior_odds)
         return best

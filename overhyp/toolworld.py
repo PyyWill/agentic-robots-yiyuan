@@ -108,7 +108,8 @@ def near_miss_set(rng, s: Situation):
 
 
 def invention_set(rng, s: Situation):
-    """No single item works; exactly one handle + tip construction does. Returns (items, handles, tips)."""
+    """No single item works; exactly one handle + tip construction does.
+    Returns the action space (items, tips, constructions) in random order and a label for each action."""
     assert s.skill == "hook_back"
     good_tip = Tool(1.0, 4.0, s.ring + rng.uniform(0.3, 1.5), True, "blue", "metal")  # binder-clip hook
     shallow_tip = Tool(1.0, 4.0, rng.uniform(0.2, 0.8) * s.ring, True, "blue", "metal")
@@ -117,11 +118,12 @@ def invention_set(rng, s: Situation):
     soft_handle = replace(good_handle, rigid=False, material="rubber", length=s.dist + 8)
     broom = Tool(s.gap + rng.uniform(1, 4), s.dist + 20, s.ring + 2, True, "red", "metal")  # the VLM's suggestion
     umbrella = Tool(rng.uniform(0.5, s.gap - 0.1), s.dist - rng.uniform(5, 20), s.ring + 2, True, "red", "metal")
-    items = [broom, umbrella, soft_handle, good_handle]
-    tips = [good_tip, shallow_tip]
-    actions = items + tips + [compose(h, t) for h in (good_handle, soft_handle) for t in tips]
-    assert [succeeds(s, a) for a in actions].count(True) == 1 and succeeds(s, compose(good_handle, good_tip))
-    return items, [good_handle, soft_handle], tips
+    actions = actions_of([broom, umbrella, soft_handle, good_handle], [good_handle, soft_handle], [good_tip, shallow_tip])
+    labels = ["broom (VLM's pick)", "umbrella", "rubber stick", "ruler", "clip", "shallow clip", "ruler + clip",
+              "ruler + shallow clip", "rubber + clip", "rubber + shallow clip"]
+    assert [succeeds(s, a) for a in actions].count(True) == 1 and succeeds(s, actions[6])
+    order = rng.permutation(len(actions))
+    return [actions[i] for i in order], [labels[i] for i in order]
 
 
 def actions_of(items, handles=(), tips=()):

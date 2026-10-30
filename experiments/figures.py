@@ -232,7 +232,7 @@ def fig_relational(agent, sets):
     inc = dict(zip(sk.cands, sk.model.inclusion()))
     pts = [(tr.s.gap, tr.t.width, tr.y, "train") for tr in agent.memory
            if tr.t.length >= tr.s.dist and tr.t.hook >= tr.s.ring and tr.t.rigid]
-    pts += [(s.gap, t.width, succeeds(s, t), "test") for s, acts in sets["L2_ood"] for t in acts
+    pts += [(s.gap, t.width, succeeds(s, t), "test") for s, acts, *_ in sets["L2_ood"] for t in acts
             if t.length >= s.dist and t.hook >= s.ring and t.rigid]
     fig, axs = plt.subplots(1, 2, figsize=(10, 3.7))
     for ph, mk, lab in (("train", "o", "training trials"), ("test", "s", "new OOD situations")):
@@ -264,15 +264,14 @@ def fig_relational(agent, sets):
 
 
 def fig_invention(agent, sets):
-    s, acts = sets["invent"][0]
+    s, acts, names = sets["invent"][0]
     _, sk = agent.skill(s)
     p = sk.model.predict(sk.X([(s, t) for t in acts]), [s.sid] * len(acts))
-    names = ["broom (VLM's pick)", "umbrella", "rubber stick", "ruler", "clip", "shallow clip",
-             "ruler + clip", "ruler + shallow clip", "rubber + clip", "rubber + shallow clip"]
     fig = plt.figure(figsize=(12, 4.2))
     gs = fig.add_gridspec(2, 2, width_ratios=[1.15, 1], wspace=0.55)
     a1, a2, a3 = fig.add_subplot(gs[0, 0]), fig.add_subplot(gs[1, 0]), fig.add_subplot(gs[:, 1])
-    render(a1, s, acts[0], f"VLM's suggestion: broom, width {acts[0].width:.1f} cm > gap {s.gap:.1f} cm")
+    b = names.index("broom (VLM's pick)")
+    render(a1, s, acts[b], f"VLM's suggestion: broom, width {acts[b].width:.1f} cm > gap {s.gap:.1f} cm")
     k = int(np.argmax(p))
     render(a2, s, acts[k], f"built: {names[k]} (never built in training)")
     order = np.argsort(p)
