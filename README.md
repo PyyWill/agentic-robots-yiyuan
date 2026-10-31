@@ -12,7 +12,28 @@ The VLM proposes (skill names, candidate predicates, prior odds); the robot's ou
 structures); generalization is read out (posterior predictive). Nothing is trained by gradient descent; the only
 learned object is the Overhypothesis posterior.
 
-<!-- RESULTS -->
+## Status: direction terminated (Oct 30, 2026) — pre-registered go/no-go: NO-GO
+
+With identical inputs (same names, predicates, outcomes, test sets), Claude (`claude-fable-5.1`) text memory matched
+or beat the Overhypothesis model on L2 at m = 32 (expected success, first attempt / within two):
+
+| condition | Overhypothesis | Claude | seeds |
+|---|---|---|---|
+| clean | 1.00 / 1.00 | 1.00 / 1.00 | 10 |
+| noise 0.2 | 0.80 / 0.96 | 0.80 / 0.96 | 10 |
+| varied (π = 0.5) | 0.46 / 0.76 | 0.54 / 0.98 | 5 |
+
+The criterion (≥ 0.15 better within two in both noise and varied, `results/PREREGISTRATION.md`) fails. Clean and
+noise sit at the theoretical ceiling for both agents (no headroom); in varied the gap comes from parts of the
+framework not implemented here (VLM-ranked prior; Kemp's kinds over situations) and closes at m = 64 (4/5 seeds at
+1.00), so fixing them could at best reach parity. Inferring a conjunction of ≤ 13 named binary predicates from
+~70 outcomes is within a frontier LLM's in-context reach; exact Bayesian inference is not scarce in this regime.
+What the prototype does establish: the exact essence is recovered from the robot's own outcomes (10/10 seeds,
+including a component added by D growth), it transfers to out-of-range situations and to building tools never
+built (1.00 vs ≤ 0.40 for the VLM prior alone), and a disjunctive skill becomes two operators (10/10). Runs were
+stopped before completion; `results/raw/` holds what finished (Amendment-1 protocol).
+
+
 
 ## 1. The model
 

@@ -2,5 +2,3 @@ __pycache__/
 *.egg-info/
 .pytest_cache/
 results/*.log
-# raw results are in progress; they are committed when the runs finish
-results/raw/
