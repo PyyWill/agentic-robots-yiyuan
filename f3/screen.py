@@ -5,6 +5,10 @@ A Meta-World task qualifies when
   (2) behaviour cloning covers a useful range of sim scores: S(96 demos) >= 0.6, S(6 demos) <= 0.7,
       S(96 demos) - S(3 demos) >= 0.4   (so feedback mechanisms that start at 6 demos have room to move).
 If more than MAX_TASKS qualify, a seeded random subset is taken.
+
+The teacher is given the TRUE state, so rule (1) only says that the actuation and dynamics gaps leave the task
+physically solvable. Whether anything transfers under the perception gap is not decided here: the analysis leaves
+out every (task, real world) in which no family gets off the floor (f3/analyze.py, FLOOR).
 """
 import argparse
 import json

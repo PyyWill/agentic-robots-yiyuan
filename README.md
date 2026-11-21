@@ -8,14 +8,15 @@
 ## 运行
 
 ```bash
-pip install -r requirements.txt
+pip install -r requirements.txt                # 在 Python 3.13 上测试过
 python -m f3.run --preset smoke --workers 2    # 约 1 分钟，确认环境可用
 python -m f3.run --preset full  --workers 64   # 120 个 job；中断后原样重跑即可，已完成的会跳过
 python -m f3.analyze results/full              # 打印并写出 results/full/RESULTS.md
 ```
 
-- 每个 job 单核约 20–30 分钟，互相独立。64 核约 1 小时，32 核约 2 小时。
+- 每个 job 单核约 20–40 分钟，互相独立。64 核约 1–1.5 小时，32 核约 2–3 小时。
 - 只用 CPU，不需要 GPU，不需要渲染。每个 worker 占用不到 1 GB 内存。
+- 日志里每个 job 一行：`done …` 为完成，`FAIL …` 为出错（其余 job 不受影响）。
 - 回传 `results/full/` 整个文件夹（120 个 `.jsonl` 加 `RESULTS.md`）。
 - 请不要修改 `f3/` 下的代码或 `tasks.json`；出错时把报错原文传回即可。
 
@@ -51,7 +52,14 @@ python -m f3.analyze results/full              # 打印并写出 results/full/RE
 
 每个 policy：sim 分数 S 用 150 个 episode，三个真机世界各 100 个 episode，全部使用独立的随机初始条件。
 
+## 分析（一段话）
+
+每个 seed 是一次完整的重复实验。在一个 seed 内，scaling 族的 6 个点 (S, 真机成功率) 连成参照曲线，每个反馈
+policy 与曲线在它自己的 S 处的值相比，差值就是"相同 sim 分数下的偏移"。seed 在任务内取平均，任务是独立单位。
+所有族都贴地板的 (任务, 真机世界) 不进入分析。
+
 ## 读结果
 
-`RESULTS.md` 的第一张表是结论所在。每一行是"相同 sim 分数下，该机制比 scaling 低多少个百分点"。
-`placebo` 行是没有进入参照曲线的那一组 scaling policy，必须落在 0 附近，否则整次运行作废。
+`RESULTS.md` 的第一张表是结论所在：每一行是"相同 sim 分数下，该机制比 scaling 高或低多少个百分点"，
+表下一行 **VERDICT** 是按预注册规则得出的判定（GENERAL / SPECIFIC / MIXED / NO-GO / NOT ESTABLISHED / INVALID）。
+`placebo` 行是另一个 seed 的 scaling 族，走与反馈族完全相同的流程，必须落在 0 附近，否则判定为 INVALID。

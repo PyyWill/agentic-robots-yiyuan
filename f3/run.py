@@ -24,9 +24,17 @@ from .worlds import REAL, SIM, World, teacher  # noqa: E402
 
 
 def job(task, cond, seed, cfg, out):
+    """Run one job; a failure is reported and does not stop the other jobs."""
     path = out / f"{task}__{cond}__{seed}.jsonl"
     if path.exists():
         return f"skip  {path.name}"
+    try:
+        return _job(task, cond, seed, cfg, path)
+    except Exception as err:  # noqa: BLE001
+        return f"FAIL  {path.name}  {type(err).__name__}: {err}"
+
+
+def _job(task, cond, seed, cfg, path):
     t0 = time.time()
     world, tch = World(task, seed), teacher(task)
     rng = np.random.default_rng([seed, cond == "dr"])
