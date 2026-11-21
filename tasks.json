@@ -1,0 +1,519 @@
+{
+ "tasks": [
+  "button-press-wall-v3",
+  "coffee-pull-v3",
+  "coffee-push-v3",
+  "dial-turn-v3",
+  "hand-insert-v3",
+  "handle-press-side-v3",
+  "pick-place-v3",
+  "push-v3",
+  "push-wall-v3",
+  "reach-v3",
+  "stick-push-v3",
+  "sweep-into-v3"
+ ],
+ "qualified": [
+  "button-press-wall-v3",
+  "coffee-pull-v3",
+  "coffee-push-v3",
+  "dial-turn-v3",
+  "hand-insert-v3",
+  "handle-press-side-v3",
+  "pick-place-v3",
+  "push-v3",
+  "push-wall-v3",
+  "reach-v3",
+  "stick-push-v3",
+  "sweep-into-v3"
+ ],
+ "table": [
+  {
+   "task": "assembly-v3",
+   "teacher_sim": 1.0,
+   "teacher_act": 0.03333333333333333,
+   "teacher_obs": 1.0,
+   "teacher_all": 0.23333333333333334,
+   "qualifies": false
+  },
+  {
+   "task": "basketball-v3",
+   "teacher_sim": 0.9666666666666667,
+   "teacher_act": 0.0,
+   "teacher_obs": 0.9666666666666667,
+   "teacher_all": 0.13333333333333333,
+   "qualifies": false
+  },
+  {
+   "task": "bin-picking-v3",
+   "teacher_sim": 0.6,
+   "teacher_act": 0.0,
+   "teacher_obs": 0.6,
+   "teacher_all": 0.0,
+   "qualifies": false
+  },
+  {
+   "task": "box-close-v3",
+   "teacher_sim": 0.8666666666666667,
+   "teacher_act": 0.0,
+   "teacher_obs": 0.8666666666666667,
+   "teacher_all": 0.26666666666666666,
+   "qualifies": false
+  },
+  {
+   "task": "button-press-topdown-v3",
+   "teacher_sim": 1.0,
+   "teacher_act": 1.0,
+   "teacher_obs": 1.0,
+   "teacher_all": 1.0,
+   "qualifies": false,
+   "S3": 0.5,
+   "S6": 0.9666666666666667,
+   "S96": 1.0
+  },
+  {
+   "task": "button-press-topdown-wall-v3",
+   "teacher_sim": 1.0,
+   "teacher_act": 1.0,
+   "teacher_obs": 1.0,
+   "teacher_all": 1.0,
+   "qualifies": false,
+   "S3": 0.8666666666666667,
+   "S6": 1.0,
+   "S96": 1.0
+  },
+  {
+   "task": "button-press-v3",
+   "teacher_sim": 1.0,
+   "teacher_act": 1.0,
+   "teacher_obs": 1.0,
+   "teacher_all": 1.0,
+   "qualifies": false,
+   "S3": 0.8666666666666667,
+   "S6": 0.6,
+   "S96": 0.5333333333333333
+  },
+  {
+   "task": "button-press-wall-v3",
+   "teacher_sim": 1.0,
+   "teacher_act": 0.9666666666666667,
+   "teacher_obs": 1.0,
+   "teacher_all": 0.9666666666666667,
+   "qualifies": true,
+   "S3": 0.13333333333333333,
+   "S6": 0.43333333333333335,
+   "S96": 1.0
+  },
+  {
+   "task": "coffee-button-v3",
+   "teacher_sim": 1.0,
+   "teacher_act": 1.0,
+   "teacher_obs": 1.0,
+   "teacher_all": 1.0,
+   "qualifies": false,
+   "S3": 0.8666666666666667,
+   "S6": 0.8666666666666667,
+   "S96": 1.0
+  },
+  {
+   "task": "coffee-pull-v3",
+   "teacher_sim": 1.0,
+   "teacher_act": 0.9666666666666667,
+   "teacher_obs": 1.0,
+   "teacher_all": 1.0,
+   "qualifies": true,
+   "S3": 0.03333333333333333,
+   "S6": 0.1,
+   "S96": 1.0
+  },
+  {
+   "task": "coffee-push-v3",
+   "teacher_sim": 1.0,
+   "teacher_act": 0.8666666666666667,
+   "teacher_obs": 1.0,
+   "teacher_all": 0.9666666666666667,
+   "qualifies": true,
+   "S3": 0.1,
+   "S6": 0.3,
+   "S96": 0.9666666666666667
+  },
+  {
+   "task": "dial-turn-v3",
+   "teacher_sim": 1.0,
+   "teacher_act": 0.6666666666666666,
+   "teacher_obs": 1.0,
+   "teacher_all": 0.7,
+   "qualifies": true,
+   "S3": 0.4,
+   "S6": 0.5333333333333333,
+   "S96": 1.0
+  },
+  {
+   "task": "disassemble-v3",
+   "teacher_sim": 0.5333333333333333,
+   "teacher_act": 0.6333333333333333,
+   "teacher_obs": 0.5333333333333333,
+   "teacher_all": 0.6333333333333333,
+   "qualifies": false
+  },
+  {
+   "task": "door-close-v3",
+   "teacher_sim": 1.0,
+   "teacher_act": 1.0,
+   "teacher_obs": 1.0,
+   "teacher_all": 1.0,
+   "qualifies": false,
+   "S3": 0.4,
+   "S6": 0.3,
+   "S96": 0.6333333333333333
+  },
+  {
+   "task": "door-lock-v3",
+   "teacher_sim": 0.8666666666666667,
+   "teacher_act": 0.3333333333333333,
+   "teacher_obs": 0.8666666666666667,
+   "teacher_all": 0.26666666666666666,
+   "qualifies": false
+  },
+  {
+   "task": "door-open-v3",
+   "teacher_sim": 0.9666666666666667,
+   "teacher_act": 0.7,
+   "teacher_obs": 0.9666666666666667,
+   "teacher_all": 1.0,
+   "qualifies": false,
+   "S3": 0.7,
+   "S6": 0.9333333333333333,
+   "S96": 1.0
+  },
+  {
+   "task": "door-unlock-v3",
+   "teacher_sim": 1.0,
+   "teacher_act": 1.0,
+   "teacher_obs": 1.0,
+   "teacher_all": 1.0,
+   "qualifies": false,
+   "S3": 0.4,
+   "S6": 0.8333333333333334,
+   "S96": 1.0
+  },
+  {
+   "task": "drawer-close-v3",
+   "teacher_sim": 1.0,
+   "teacher_act": 1.0,
+   "teacher_obs": 1.0,
+   "teacher_all": 1.0,
+   "qualifies": false,
+   "S3": 0.4666666666666667,
+   "S6": 0.9666666666666667,
+   "S96": 1.0
+  },
+  {
+   "task": "drawer-open-v3",
+   "teacher_sim": 1.0,
+   "teacher_act": 0.16666666666666666,
+   "teacher_obs": 1.0,
+   "teacher_all": 0.5333333333333333,
+   "qualifies": false
+  },
+  {
+   "task": "faucet-close-v3",
+   "teacher_sim": 1.0,
+   "teacher_act": 0.7666666666666667,
+   "teacher_obs": 1.0,
+   "teacher_all": 0.9,
+   "qualifies": false,
+   "S3": 0.9333333333333333,
+   "S6": 1.0,
+   "S96": 1.0
+  },
+  {
+   "task": "faucet-open-v3",
+   "teacher_sim": 1.0,
+   "teacher_act": 0.9,
+   "teacher_obs": 1.0,
+   "teacher_all": 0.9666666666666667,
+   "qualifies": false,
+   "S3": 0.8,
+   "S6": 1.0,
+   "S96": 1.0
+  },
+  {
+   "task": "hammer-v3",
+   "teacher_sim": 1.0,
+   "teacher_act": 0.9666666666666667,
+   "teacher_obs": 1.0,
+   "teacher_all": 1.0,
+   "qualifies": false,
+   "S3": 0.6666666666666666,
+   "S6": 0.7333333333333333,
+   "S96": 1.0
+  },
+  {
+   "task": "hand-insert-v3",
+   "teacher_sim": 0.9333333333333333,
+   "teacher_act": 0.8333333333333334,
+   "teacher_obs": 0.9333333333333333,
+   "teacher_all": 0.9666666666666667,
+   "qualifies": true,
+   "S3": 0.06666666666666667,
+   "S6": 0.0,
+   "S96": 0.9666666666666667
+  },
+  {
+   "task": "handle-press-side-v3",
+   "teacher_sim": 1.0,
+   "teacher_act": 1.0,
+   "teacher_obs": 1.0,
+   "teacher_all": 1.0,
+   "qualifies": true,
+   "S3": 0.5666666666666667,
+   "S6": 0.7,
+   "S96": 1.0
+  },
+  {
+   "task": "handle-press-v3",
+   "teacher_sim": 1.0,
+   "teacher_act": 1.0,
+   "teacher_obs": 1.0,
+   "teacher_all": 1.0,
+   "qualifies": false,
+   "S3": 0.8333333333333334,
+   "S6": 0.8333333333333334,
+   "S96": 1.0
+  },
+  {
+   "task": "handle-pull-side-v3",
+   "teacher_sim": 1.0,
+   "teacher_act": 0.06666666666666667,
+   "teacher_obs": 1.0,
+   "teacher_all": 0.26666666666666666,
+   "qualifies": false
+  },
+  {
+   "task": "handle-pull-v3",
+   "teacher_sim": 0.8666666666666667,
+   "teacher_act": 0.5333333333333333,
+   "teacher_obs": 0.8666666666666667,
+   "teacher_all": 0.36666666666666664,
+   "qualifies": false
+  },
+  {
+   "task": "lever-pull-v3",
+   "teacher_sim": 1.0,
+   "teacher_act": 0.3,
+   "teacher_obs": 1.0,
+   "teacher_all": 0.36666666666666664,
+   "qualifies": false
+  },
+  {
+   "task": "peg-insert-side-v3",
+   "teacher_sim": 0.7,
+   "teacher_act": 0.0,
+   "teacher_obs": 0.7,
+   "teacher_all": 0.16666666666666666,
+   "qualifies": false
+  },
+  {
+   "task": "peg-unplug-side-v3",
+   "teacher_sim": 0.5,
+   "teacher_act": 0.16666666666666666,
+   "teacher_obs": 0.5,
+   "teacher_all": 0.1,
+   "qualifies": false
+  },
+  {
+   "task": "pick-out-of-hole-v3",
+   "teacher_sim": 0.8333333333333334,
+   "teacher_act": 0.0,
+   "teacher_obs": 0.8333333333333334,
+   "teacher_all": 0.0,
+   "qualifies": false
+  },
+  {
+   "task": "pick-place-v3",
+   "teacher_sim": 1.0,
+   "teacher_act": 0.8666666666666667,
+   "teacher_obs": 1.0,
+   "teacher_all": 1.0,
+   "qualifies": true,
+   "S3": 0.13333333333333333,
+   "S6": 0.2,
+   "S96": 1.0
+  },
+  {
+   "task": "pick-place-wall-v3",
+   "teacher_sim": 0.9666666666666667,
+   "teacher_act": 0.23333333333333334,
+   "teacher_obs": 0.9666666666666667,
+   "teacher_all": 0.5666666666666667,
+   "qualifies": false
+  },
+  {
+   "task": "plate-slide-back-side-v3",
+   "teacher_sim": 1.0,
+   "teacher_act": 0.8333333333333334,
+   "teacher_obs": 1.0,
+   "teacher_all": 1.0,
+   "qualifies": false,
+   "S3": 0.13333333333333333,
+   "S6": 1.0,
+   "S96": 0.9333333333333333
+  },
+  {
+   "task": "plate-slide-back-v3",
+   "teacher_sim": 1.0,
+   "teacher_act": 0.5333333333333333,
+   "teacher_obs": 1.0,
+   "teacher_all": 0.9666666666666667,
+   "qualifies": false,
+   "S3": 0.36666666666666664,
+   "S6": 1.0,
+   "S96": 1.0
+  },
+  {
+   "task": "plate-slide-side-v3",
+   "teacher_sim": 1.0,
+   "teacher_act": 1.0,
+   "teacher_obs": 1.0,
+   "teacher_all": 1.0,
+   "qualifies": false,
+   "S3": 0.9666666666666667,
+   "S6": 0.9666666666666667,
+   "S96": 1.0
+  },
+  {
+   "task": "plate-slide-v3",
+   "teacher_sim": 1.0,
+   "teacher_act": 1.0,
+   "teacher_obs": 1.0,
+   "teacher_all": 1.0,
+   "qualifies": false,
+   "S3": 0.9,
+   "S6": 1.0,
+   "S96": 1.0
+  },
+  {
+   "task": "push-back-v3",
+   "teacher_sim": 0.4666666666666667,
+   "teacher_act": 0.5333333333333333,
+   "teacher_obs": 0.4666666666666667,
+   "teacher_all": 0.6,
+   "qualifies": false
+  },
+  {
+   "task": "push-v3",
+   "teacher_sim": 1.0,
+   "teacher_act": 0.9666666666666667,
+   "teacher_obs": 1.0,
+   "teacher_all": 0.9333333333333333,
+   "qualifies": true,
+   "S3": 0.06666666666666667,
+   "S6": 0.2,
+   "S96": 1.0
+  },
+  {
+   "task": "push-wall-v3",
+   "teacher_sim": 1.0,
+   "teacher_act": 0.5,
+   "teacher_obs": 1.0,
+   "teacher_all": 0.9666666666666667,
+   "qualifies": true,
+   "S3": 0.03333333333333333,
+   "S6": 0.1,
+   "S96": 1.0
+  },
+  {
+   "task": "reach-v3",
+   "teacher_sim": 1.0,
+   "teacher_act": 0.9666666666666667,
+   "teacher_obs": 1.0,
+   "teacher_all": 0.9666666666666667,
+   "qualifies": true,
+   "S3": 0.03333333333333333,
+   "S6": 0.1,
+   "S96": 0.6
+  },
+  {
+   "task": "reach-wall-v3",
+   "teacher_sim": 1.0,
+   "teacher_act": 0.9666666666666667,
+   "teacher_obs": 1.0,
+   "teacher_all": 1.0,
+   "qualifies": false,
+   "S3": 0.0,
+   "S6": 0.06666666666666667,
+   "S96": 0.13333333333333333
+  },
+  {
+   "task": "shelf-place-v3",
+   "teacher_sim": 0.8666666666666667,
+   "teacher_act": 0.06666666666666667,
+   "teacher_obs": 0.8666666666666667,
+   "teacher_all": 0.23333333333333334,
+   "qualifies": false
+  },
+  {
+   "task": "soccer-v3",
+   "teacher_sim": 0.9333333333333333,
+   "teacher_act": 0.3333333333333333,
+   "teacher_obs": 0.9333333333333333,
+   "teacher_all": 0.3,
+   "qualifies": false
+  },
+  {
+   "task": "stick-pull-v3",
+   "teacher_sim": 0.6666666666666666,
+   "teacher_act": 0.0,
+   "teacher_obs": 0.6666666666666666,
+   "teacher_all": 0.3,
+   "qualifies": false
+  },
+  {
+   "task": "stick-push-v3",
+   "teacher_sim": 1.0,
+   "teacher_act": 0.8333333333333334,
+   "teacher_obs": 1.0,
+   "teacher_all": 0.9666666666666667,
+   "qualifies": true,
+   "S3": 0.06666666666666667,
+   "S6": 0.23333333333333334,
+   "S96": 1.0
+  },
+  {
+   "task": "sweep-into-v3",
+   "teacher_sim": 0.9666666666666667,
+   "teacher_act": 0.8333333333333334,
+   "teacher_obs": 0.9666666666666667,
+   "teacher_all": 1.0,
+   "qualifies": true,
+   "S3": 0.43333333333333335,
+   "S6": 0.6666666666666666,
+   "S96": 0.9666666666666667
+  },
+  {
+   "task": "sweep-v3",
+   "teacher_sim": 1.0,
+   "teacher_act": 0.23333333333333334,
+   "teacher_obs": 1.0,
+   "teacher_all": 0.7333333333333333,
+   "qualifies": false
+  },
+  {
+   "task": "window-close-v3",
+   "teacher_sim": 1.0,
+   "teacher_act": 0.13333333333333333,
+   "teacher_obs": 1.0,
+   "teacher_all": 0.9333333333333333,
+   "qualifies": false
+  },
+  {
+   "task": "window-open-v3",
+   "teacher_sim": 1.0,
+   "teacher_act": 0.0,
+   "teacher_obs": 1.0,
+   "teacher_all": 0.6,
+   "qualifies": false
+  }
+ ]
+}
