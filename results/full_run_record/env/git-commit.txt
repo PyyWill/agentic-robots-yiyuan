@@ -1,0 +1,3 @@
+commit 0411d101ad293eda46a36c694d3926f95ce85a29
+branch-head-date 2026-11-21T17:53:48-05:00
+subject Analysis frozen: per-seed replicates, floor rule, MIXED verdict; pilot results

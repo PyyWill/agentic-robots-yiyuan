@@ -1,0 +1,35 @@
+collected: 2026-11-21T23:17:11Z
+pod: RUNPOD_CPU_COUNT=64 RUNPOD_DC_ID=EU-RO-1 RUNPOD_GPU_COUNT=2 RUNPOD_GPU_NAME=NVIDIA+RTX+PRO+4500+Blackwell RUNPOD_MEM_GB=125 
+kernel: Linux 6.8.0-149-generic x86_64
+PRETTY_NAME="Ubuntu 24.04.4 LTS"
+--- lscpu ---
+Architecture:                            x86_64
+CPU op-mode(s):                          32-bit, 64-bit
+Address sizes:                           48 bits physical, 48 bits virtual
+Byte Order:                              Little Endian
+CPU(s):                                  128
+On-line CPU(s) list:                     0-127
+Vendor ID:                               AuthenticAMD
+Model name:                              AMD EPYC 7713P 64-Core Processor
+CPU family:                              25
+Model:                                   1
+Thread(s) per core:                      2
+Core(s) per socket:                      64
+Socket(s):                               1
+Stepping:                                1
+Frequency boost:                         enabled
+CPU(s) scaling MHz:                      44%
+CPU max MHz:                             3720.7029
+CPU min MHz:                             1500.0000
+BogoMIPS:                                3999.86
+Virtualization:                          AMD-V
+L1d cache:                               2 MiB (64 instances)
+L1i cache:                               2 MiB (64 instances)
+L2 cache:                                32 MiB (64 instances)
+L3 cache:                                256 MiB (8 instances)
+NUMA node(s):                            1
+NUMA node0 CPU(s):                       0-127
+--- limits ---
+nproc=128 cgroup cpu.max=5440000 100000 memory.max=124999999488
+--- python ---
+Python 3.13.12 (main, Feb  4 2026, 09:25:39) [GCC 13.3.0]

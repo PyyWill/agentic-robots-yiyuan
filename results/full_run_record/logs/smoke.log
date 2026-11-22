@@ -1,0 +1,44 @@
+##### smoke start 2026-11-21T23:14:16Z
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/root/f3/agentic-robots-yiyuan/f3/run.py", line 20, in <module>
+    from . import families as fam  # noqa: E402
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/f3/agentic-robots-yiyuan/f3/families.py", line 15, in <module>
+    from .learner import Policy, episode, successes
+  File "/root/f3/agentic-robots-yiyuan/f3/learner.py", line 7, in <module>
+    from .worlds import T_MAX
+  File "/root/f3/agentic-robots-yiyuan/f3/worlds.py", line 15, in <module>
+    from metaworld.env_dict import ALL_V3_ENVIRONMENTS  # noqa: E402
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/f3/venv/lib/python3.13/site-packages/metaworld/__init__.py", line 18, in <module>
+    import metaworld.env_dict as _env_dict
+  File "/root/f3/venv/lib/python3.13/site-packages/metaworld/env_dict.py", line 15, in <module>
+    from metaworld import envs
+  File "/root/f3/venv/lib/python3.13/site-packages/metaworld/envs/__init__.py", line 1, in <module>
+    from metaworld.envs.sawyer_assembly_peg_v3 import SawyerNutAssemblyEnvV3
+  File "/root/f3/venv/lib/python3.13/site-packages/metaworld/envs/sawyer_assembly_peg_v3.py", line 11, in <module>
+    from metaworld.sawyer_xyz_env import RenderMode, SawyerXYZEnv
+  File "/root/f3/venv/lib/python3.13/site-packages/metaworld/sawyer_xyz_env.py", line 13, in <module>
+    from gymnasium.envs.mujoco import MujocoEnv as mjenv_gym
+  File "/root/f3/venv/lib/python3.13/site-packages/gymnasium/envs/mujoco/__init__.py", line 2, in <module>
+    from gymnasium.envs.mujoco.mujoco_rendering import MujocoRenderer
+  File "/root/f3/venv/lib/python3.13/site-packages/gymnasium/envs/mujoco/mujoco_rendering.py", line 8, in <module>
+    from packaging.version import Version
+ModuleNotFoundError: No module named 'packaging'
+
+real	0m1.228s
+user	0m0.914s
+sys	0m0.302s
+smoke exit=1  2026-11-21T23:14:18Z
+##### smoke (2nd attempt) start 2026-11-21T23:14:45Z
+smoke: 3 jobs on 2 workers -> /root/f3/agentic-robots-yiyuan/results/smoke
+done  pick-place-v3__nom__901.jsonl  6 policies  29s
+done  pick-place-v3__nom__900.jsonl  6 policies  29s
+done  pick-place-v3__nom__902.jsonl  6 policies  29s
+
+real	1m0.513s
+user	1m30.223s
+sys	0m1.352s
+smoke exit=0  2026-11-21T23:15:46Z

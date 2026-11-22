@@ -1,0 +1,1 @@
+DEVIATION 2026-11-21T23:14:43Z: 'pip install -r requirements.txt' left gymnasium 1.4.0's mujoco module without its undeclared dependency 'packaging' (ModuleNotFoundError at import). Fixed with: pip install packaging -> packaging==26.3

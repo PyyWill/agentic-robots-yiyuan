@@ -1,0 +1,17 @@
+machine:       Runpod GPU pod, rented for its CPUs only
+created:       2026-11-21T23:11:17Z via GraphQL podFindAndDeployOnDemand
+hardware:      Secure Cloud, EU-RO-1, 2x RTX PRO 4500 (GPUs unused), 64 vCPU / 125 GB, host AMD EPYC 7713P (64c/128t)
+               cgroup CPU quota = 54.4 CPUs (85% of the nominal 64 vCPU)
+price:         1.44 USD/hr (whole pod)
+image:         runpod/base:1.0.2-ubuntu2404, Python 3.13.12 venv
+run:           python -m f3.run --preset full --workers 64   (started 2026-11-21T23:17:11Z, commit 0411d10)
+
+--- outcome ---
+full run:      2026-11-21T23:17:11Z -> 2026-11-22T00:23:53Z (66.7 min wall, 55.0 CPU-hours), 120/120 jobs done, 0 FAIL
+analysis:      python -m f3.analyze results/full -> VERDICT MIXED (results/full/RESULTS.md, untouched analysis output)
+deviation:     requirements.txt lacks 'packaging' (needed by gymnasium 1.4.0's mujoco module); installed packaging==26.3. See env/deviations.txt
+checks:        checks/full_recheck  = 3 confirmatory jobs recomputed in fresh processes, byte-identical to results/full
+               checks/pilot_repro   = 2 pilot jobs (seed 0) recomputed on the pod; NOT byte-identical to the committed pilot files (other machine)
+               checks/pilot_repeat_A = same pilot job repeated on the pod, byte-identical to checks/pilot_repro (same-machine determinism)
+terminated:    2026-11-22T00:56:18Z (pod and its volume deleted after all 147 files were verified locally by sha256)
+billed time:   105 min at 1.44 USD/hr, about 2.5 USD

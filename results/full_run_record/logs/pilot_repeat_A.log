@@ -1,0 +1,7 @@
+best_of_k candidate scores: [10, 8, 6, 17, 6, 4] -> picks 3
+best_of_k candidate scores: [32, 35, 30, 34, 33, 35] -> picks 1
+best_of_k candidate scores: [29, 35, 30, 34, 37, 34] -> picks 4
+best_of_k candidate scores: [36, 38, 34, 35, 37, 34] -> picks 1
+best_of_k candidate scores: [40, 40, 39, 40, 40, 40] -> picks 0
+best_of_k candidate scores: [38, 38, 40, 27, 40, 38] -> picks 2
+done  dial-turn-v3__nom__0.jsonl  22 policies  829s

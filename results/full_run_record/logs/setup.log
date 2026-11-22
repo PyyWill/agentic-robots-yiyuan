@@ -1,0 +1,28 @@
+##### setup start 2026-11-21T23:13:14Z
+Cloning into 'agentic-robots-yiyuan'...
+commit 0411d101ad293eda46a36c694d3926f95ce85a29
+branch-head-date 2026-11-21T17:53:48-05:00
+subject Analysis frozen: per-seed replicates, floor rule, MIXED verdict; pilot results
+Python 3.13.12
+/root/f3/venv/bin/python
+/root/f3/venv/bin/pip
+pip 25.3 from /root/f3/venv/lib/python3.13/site-packages/pip (python 3.13)
+Successfully installed absl-py-2.5.1 cloudpickle-3.1.3 etils-1.15.0 farama-notifications-0.0.6 fsspec-2026.9.0 glfw-2.11.0 gymnasium-1.4.0 imageio-2.38.2 joblib-1.6.0 metaworld-3.1.1 mujoco-3.3.0 narwhals-2.29.0 numpy-2.5.5 pandas-3.1.1 pillow-13.0.0 pyopengl-3.1.10 python-dateutil-4.0.0 scikit-learn-1.9.1 scipy-1.18.1 tabulate-0.10.0 threadpoolctl-3.8.0 typing-extensions-4.16.0 tzdata-2026.6 zipp-4.1.2
+
+[notice] A new release of pip is available: 25.3 -> 26.3
+[notice] To update, run: pip install --upgrade pip
+
+real	0m22.991s
+user	0m15.028s
+sys	0m4.765s
+24 /root/f3/env/pip-freeze.txt
+gymnasium==1.4.0
+joblib==1.6.0
+metaworld==3.1.1
+mujoco==3.3.0
+numpy==2.5.5
+pandas==3.1.1
+scikit-learn==1.9.1
+scipy==1.18.1
+tabulate==0.10.0
+##### setup done 2026-11-21T23:13:40Z
